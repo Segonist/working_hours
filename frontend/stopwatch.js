@@ -50,6 +50,13 @@ class Stopwatch {
         }, 10);
     }
 
+    resume() {
+        this.interval_id = setInterval(() => {
+            this.update_time();
+            this.update_element_text();
+        }, 10);
+    }
+
     stop() {
         clearInterval(this.interval_id);
     }
