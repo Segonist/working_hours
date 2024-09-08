@@ -2,9 +2,6 @@ from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
 import sqlite3
 
-from pydantic import BaseModel
-from enum import Enum
-
 router = APIRouter()
 
 
@@ -13,7 +10,7 @@ async def create_shift(shift: dict):
     connection = sqlite3.connect("database/working_hours.db")
     cursor = connection.cursor()
     cursor.execute("INSERT INTO shift (user_id, start_timestamp, end_timestamp, state, wage) \
-                                VALUES (:user_id, :start_timestamp, :end_timestamp, :state, :wage)", dict(shift))
+                                VALUES (:user_id, :start_timestamp, :end_timestamp, :state, :wage)", shift)
     connection.commit()
     id = cursor.lastrowid
     connection.close()

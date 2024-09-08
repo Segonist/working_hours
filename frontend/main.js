@@ -11,22 +11,30 @@ async function resume_stopwatch() {
     const request = new Request(`${host}/api/shift/last`, {
         method: "GET",
     });
-    const response = await fetch(request);
-    let shift = await response.text();
-    shift = JSON.parse(shift)[0];
-    if (shift.state == 0) {
-        localStorage.setItem("shift_id", shift.id);
-        stopwatch.start_timestamp = shift.start_timestamp;
-        stopwatch.resume();
-    }
+
+    await fetch(request)
+        .then((responce) => {
+            if (!responce.ok) {
+                throw new Error(`${responce.status} ${responce.statusText}`);
+            }
+            return responce.json();
+        })
+        .then((data) => {
+            data = data[0];
+
+            if (data && data.state == 0) {
+                localStorage.setItem("shift_id", data.id);
+                stopwatch.start_timestamp = data.start_timestamp;
+                stopwatch.resume();
+            }
+        });
 
     console.log("loading complete");
 }
 
 async function start_stopwatch() {
-    stopwatch.start();
+    let start = new Date().getTime();
 
-    let start = stopwatch.start_timestamp;
     const request = new Request(`${host}/api/shift`, {
         method: "POST",
         headers: {
@@ -41,17 +49,28 @@ async function start_stopwatch() {
             wage: 10.0,
         }),
     });
-    const response = await fetch(request);
-    let id = await response.text().id;
-    localStorage.setItem("shift_id", id);
+
+    await fetch(request)
+        .then((responce) => {
+            if (!responce.ok) {
+                throw new Error(`${responce.status} ${responce.statusText}`);
+            }
+
+            return responce.json();
+        })
+        .then((data) => {
+            id = data.id;
+            localStorage.setItem("shift_id", id);
+        });
+
+    stopwatch.start_timestamp = start;
+    stopwatch.resume();
 }
 
 async function stop_stopwatch() {
-    // TODO can't stop without refresh
-    stopwatch.stop();
-
     let end = stopwatch.start_timestamp + stopwatch.milliseconds_past;
     let shift_id = localStorage.getItem("shift_id");
+
     const request = new Request(`${host}/api/shift/${shift_id}`, {
         method: "PUT",
         headers: {
@@ -62,6 +81,12 @@ async function stop_stopwatch() {
             state: 1,
         }),
     });
-    const response = await fetch(request);
-    console.log(response.status);
+
+    await fetch(request).then((responce) => {
+        if (!responce.ok) {
+            throw new Error(`${responce.status} ${responce.statusText}`);
+        }
+    });
+
+    stopwatch.stop();
 }
