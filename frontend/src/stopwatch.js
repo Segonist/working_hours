@@ -11,6 +11,7 @@ class Stopwatch {
 
     constructor(element) {
         this.element = element;
+        console.log(element);
     }
 
     format_time_number(number) {
@@ -42,6 +43,8 @@ class Stopwatch {
     }
 
     start() {
+        console.log("start");
+
         this.start_timestamp = new Date().getTime();
 
         this.interval_id = setInterval(() => {
@@ -51,6 +54,8 @@ class Stopwatch {
     }
 
     resume() {
+        console.log("resume");
+
         this.interval_id = setInterval(() => {
             this.update_time();
             this.update_element_text();
@@ -58,6 +63,10 @@ class Stopwatch {
     }
 
     stop() {
+        console.log("stop");
+
         clearInterval(this.interval_id);
     }
 }
+
+export default Stopwatch;
