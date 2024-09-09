@@ -1,21 +1,18 @@
 import "./App.css";
-import { useEffect } from "react";
-import Stopwatch from "./stopwatch.js";
+import { useEffect, useState } from "react";
+import Stopwatch from "./Stopwatch.jsx";
 
-function App() {
+const App = () => {
     const host = "http://127.0.0.1:8000";
 
-    let stopwatch;
+    const [startTime, setStartTime] = useState(0);
+    const [isRunning, setIsRunning] = useState(false);
 
     useEffect(() => {
-        const stopwatch_element = document.getElementById("stopwatch");
-        stopwatch = new Stopwatch(stopwatch_element);
-        resume_stopwatch();
+        tryResume();
     }, []);
 
-    async function resume_stopwatch() {
-        console.log("loading...");
-
+    async function tryResume() {
         const request = new Request(`${host}/api/shift/last`, {
             method: "GET",
         });
@@ -34,15 +31,13 @@ function App() {
 
                 if (data && data.state == 0) {
                     localStorage.setItem("shift_id", data.id);
-                    stopwatch.start_timestamp = data.start_timestamp;
-                    stopwatch.resume();
+                    setStartTime(data.start_timestamp);
+                    setIsRunning(true);
                 }
             });
-
-        console.log("loading complete");
     }
 
-    async function start_stopwatch() {
+    async function handleStart() {
         let start = new Date().getTime();
 
         const request = new Request(`${host}/api/shift`, {
@@ -71,16 +66,16 @@ function App() {
                 return responce.json();
             })
             .then((data) => {
-                id = data.id;
+                let id = data.id;
                 localStorage.setItem("shift_id", id);
             });
 
-        stopwatch.start_timestamp = start;
-        stopwatch.resume();
+        setStartTime(start);
+        setIsRunning(true);
     }
 
-    async function stop_stopwatch() {
-        let end = stopwatch.start_timestamp + stopwatch.milliseconds_past;
+    async function handleStop() {
+        let stop = new Date().getTime();
         let shift_id = localStorage.getItem("shift_id");
 
         const request = new Request(`${host}/api/shift/${shift_id}`, {
@@ -89,7 +84,7 @@ function App() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                end_timestamp: end,
+                end_timestamp: stop,
                 state: 1,
             }),
         });
@@ -100,16 +95,19 @@ function App() {
             }
         });
 
-        stopwatch.stop();
+        setIsRunning(false);
     }
 
     return (
         <>
-            <Stopwatch />
-            <button onClick={start_stopwatch}>Почати зміну</button>
-            <button onClick={stop_stopwatch}>Закінчити зміну</button>
+            <Stopwatch startTime={startTime} isRunning={isRunning} />
+            {!isRunning ? (
+                <button onClick={handleStart}>Почати зміну</button>
+            ) : (
+                <button onClick={handleStop}>Закінчити зміну</button>
+            )}
         </>
     );
-}
+};
 
 export default App;
