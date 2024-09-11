@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Stopwatch from "./Stopwatch.jsx";
+import Stopwatch from "../Stopwatch.jsx";
 
 const App = () => {
     const host = "http://127.0.0.1:8000";
