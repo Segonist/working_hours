@@ -5,6 +5,20 @@ import sqlite3
 router = APIRouter()
 
 
+@router.get("/api/shifts")
+async def get_all_shifts():
+    # TODO ПРЯМ ЗОВСІМ ЗМІНИТИ КОЛИ ДОДАТИ АВТЕНТИФІКАЦІЮ
+    connection = sqlite3.connect("database/working_hours.db")
+    connection.row_factory = sqlite3.Row
+    cursor = connection.cursor()
+
+    responce = cursor.execute("SELECT * FROM shift")
+    responce = responce.fetchall()
+    connection.close()
+
+    return {"data": responce}
+
+
 @router.post("/api/shift")
 async def create_shift(shift: dict):
     connection = sqlite3.connect("database/working_hours.db")
@@ -44,17 +58,27 @@ async def read_shift(shift_id: int | str):
 async def update_shift(shift_id: int, shift: dict):
     connection = sqlite3.connect("database/working_hours.db")
     cursor = connection.cursor()
+
     shift = dict(shift)
     set_string = ", ".join(
         [f"{column} = :{column}" for column in shift.keys()])
     shift["id"] = shift_id
+
     cursor.execute(f"UPDATE shift SET {set_string} \
                    WHERE id = :id", shift)
     connection.commit()
+    connection.close()
 
     return HTMLResponse(status_code=200)
 
 
 @router.delete("/api/shift/{shift_id}")
 async def delete_shift(shift_id: int):
-    return {"shift_id": shift_id, "method": "delete"}
+    connection = sqlite3.connect("database/working_hours.db")
+    cursor = connection.cursor()
+
+    cursor.execute("DELETE FROM shift WHERE id = ?", (shift_id,))
+    connection.commit()
+    connection.close()
+
+    return {HTMLResponse(status_code=200)}
