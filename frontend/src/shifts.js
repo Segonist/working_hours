@@ -1,26 +1,5 @@
 const host = "http://127.0.0.1:8000";
 
-export async function getLastShift() {
-    // TODO ПЕРЕРОБИТИ КОЛИ ДОДАТИ АВТЕНТИФІКАЦІЮ
-    const request = new Request(`${host}/api/shift/last`, {
-        method: "GET",
-    });
-
-    let responceData = await fetch(request)
-        .then((responce) => {
-            if (!responce.ok) {
-                throw new Error(`${responce.status} ${responce.statusText}`);
-            }
-            return responce.json();
-        })
-        .then((data) => {
-            data = data[0];
-            return data;
-        });
-
-    return responceData;
-}
-
 export async function getShift(shift_id) {
     const request = new Request(`${host}/api/shift/${shift_id}`, {
         method: "GET",
@@ -54,7 +33,7 @@ export async function getShifts() {
             return responce.json();
         })
         .then((data) => {
-            return data.data;
+            return data;
         });
 
     return responceData;

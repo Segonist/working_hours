@@ -7,7 +7,7 @@ const Error = () => {
         <>
             <img src="/desintegration.gif" alt="" />
             <h1>
-                Помилка {error.status} - {error.statusText}
+                Помилка {error.status} {error.statusText}
             </h1>
         </>
     );

@@ -1,84 +1,73 @@
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse
-import sqlite3
+from sqlmodel import Session, select, func
+
+from models import Shift
+from database import engine
 
 router = APIRouter()
 
 
 @router.get("/api/shifts")
 async def get_all_shifts():
-    # TODO ПРЯМ ЗОВСІМ ЗМІНИТИ КОЛИ ДОДАТИ АВТЕНТИФІКАЦІЮ
-    connection = sqlite3.connect("database/working_hours.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
+    # TODO ПОВЕРНУТИ ТІЛЬКИ ТЕ, ДО ЧОГО КОРИСТУВАЧ МАЄ ДОСТУП
+    with Session(engine) as session:
+        statement = select(Shift)
+        shifts = session.exec(statement).all()
 
-    responce = cursor.execute("SELECT * FROM shift")
-    responce = responce.fetchall()
-    connection.close()
-
-    return {"data": responce}
+    return shifts
 
 
 @router.post("/api/shift")
-async def create_shift(shift: dict):
-    connection = sqlite3.connect("database/working_hours.db")
-    cursor = connection.cursor()
-    cursor.execute("INSERT INTO shift (user_id, start_timestamp, end_timestamp, state, wage) \
-                                VALUES (:user_id, :start_timestamp, :end_timestamp, :state, :wage)", shift)
-    connection.commit()
-    id = cursor.lastrowid
-    connection.close()
+async def create_shift(shift: Shift):
+    # TODO КОРИЧСТУВАЧ МАЄ БУТИ АВТОРИЗОВАНИМ ЩОБ СТВОРИТИ
+    with Session(engine) as session:
+        shift = dict(shift)
+        new_shift = Shift(**shift)
+        session.add(new_shift)
+
+        session.commit()
+        id = new_shift.id
 
     return {"id": id}
 
 
-@router.get("/api/shift/{shift_id}")
-async def read_shift(shift_id: int | str):
-    user_id = 0  # TODO CHANGE WHEN ADD AUTH
-    if type(shift_id) != int and shift_id != "last":
-        return HTMLResponse(status_code=404)
+@router.get("/api/shift/{shift_id}", response_model=Shift)
+async def read_shift(shift_id: int):
+    # TODO КОРИЧСТУВАЧ МАЄ МАТИ ДОСТУП ДО ВПИСУ ЩОБ ПРОЧИТАТИ
+    with Session(engine) as session:
+        if shift_id == 0:
+            statement = select(func.max(Shift.id))
+            shift_id = session.exec(statement).one()
 
-    connection = sqlite3.connect("database/working_hours.db")
-    connection.row_factory = sqlite3.Row
-    cursor = connection.cursor()
+        shift = session.get(Shift, shift_id)
 
-    if shift_id == "last":
-        responce = cursor.execute(
-            "SELECT MAX(id) FROM shift WHERE user_id = ?", (user_id,))
-        shift_id = responce.fetchone()[0]
-
-    responce = cursor.execute("SELECT * FROM shift WHERE id = ?", (shift_id,))
-    responce = responce.fetchone()
-    connection.close()
-
-    return {responce}
+    return shift
 
 
 @router.put("/api/shift/{shift_id}")
-async def update_shift(shift_id: int, shift: dict):
-    connection = sqlite3.connect("database/working_hours.db")
-    cursor = connection.cursor()
-
+async def update_shift(shift_id: int, shift: Shift):
+    # TODO КОРИЧСТУВАЧ МАЄ МАТИ ДОСТУП ДО ВПИСУ ЩОБ ЗМІНИТИ
     shift = dict(shift)
-    set_string = ", ".join(
-        [f"{column} = :{column}" for column in shift.keys()])
-    shift["id"] = shift_id
+    with Session(engine) as session:
+        existing_shift = session.get(Shift, shift_id)
 
-    cursor.execute(f"UPDATE shift SET {set_string} \
-                   WHERE id = :id", shift)
-    connection.commit()
-    connection.close()
+        for key, value in shift.items():
+            if value is not None:
+                setattr(existing_shift, key, value)
+
+        session.add(existing_shift)
+        session.commit()
 
     return HTMLResponse(status_code=200)
 
 
 @router.delete("/api/shift/{shift_id}")
 async def delete_shift(shift_id: int):
-    connection = sqlite3.connect("database/working_hours.db")
-    cursor = connection.cursor()
-
-    cursor.execute("DELETE FROM shift WHERE id = ?", (shift_id,))
-    connection.commit()
-    connection.close()
+    # TODO КОРИЧСТУВАЧ МАЄ МАТИ ДОСТУП ДО ВПИСУ ЩОБ ВИДАЛИТИ
+    with Session(engine) as session:
+        shift = session.get(Shift, shift_id)
+        session.delete(shift)
+        session.commit()
 
     return {HTMLResponse(status_code=200)}

@@ -1,4 +1,10 @@
 import { Link, useLoaderData } from "react-router-dom";
+import { getShifts } from "../shifts";
+
+export async function loader() {
+    const shifts = await getShifts();
+    return shifts;
+}
 
 const Shifts = () => {
     const shifts = useLoaderData();

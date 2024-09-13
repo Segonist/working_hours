@@ -5,8 +5,7 @@ import Login from "./routes/Login.jsx";
 import Register from "./routes/Register.jsx";
 import Profile from "./routes/Profile.jsx";
 import Shift from "./routes/Shift.jsx";
-import Shifts from "./routes/Shifts.jsx";
-import { getShifts } from "./shifts.js";
+import Shifts, { loader as shiftsLoader } from "./routes/Shifts.jsx";
 
 import { createBrowserRouter } from "react-router-dom";
 
@@ -39,7 +38,7 @@ const routes = createBrowserRouter([
             {
                 path: "/shifts",
                 element: <Shifts />,
-                loader: getShifts,
+                loader: shiftsLoader,
             },
         ],
     },

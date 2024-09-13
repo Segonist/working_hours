@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Stopwatch from "../components/Stopwatch.jsx";
-import { createShift, getLastShift, updateShift } from "../shifts.js";
+import { createShift, getShift, updateShift } from "../shifts.js";
 
 const App = () => {
     const [startTime, setStartTime] = useState(0);
@@ -11,7 +11,7 @@ const App = () => {
     }, []);
 
     async function tryResume() {
-        let data = await getLastShift();
+        let data = await getShift(0);
 
         if (data && data.state == 0) {
             localStorage.setItem("shift_id", data.id);
