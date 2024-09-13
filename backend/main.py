@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-import routers.shifts
+import shifts
 
 app = FastAPI()
 
@@ -17,4 +17,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(routers.shifts.router)
+app.include_router(shifts.router)

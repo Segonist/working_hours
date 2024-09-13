@@ -1,4 +1,5 @@
 from sqlmodel import SQLModel, Field
+from decimal import Decimal
 
 
 class Shift(SQLModel, table=True):
@@ -8,4 +9,4 @@ class Shift(SQLModel, table=True):
     start_timestamp: int
     end_timestamp: int | None = None
     state: bool
-    wage: float
+    wage: Decimal = Field(max_digits=8, decimal_places=2)

@@ -9,7 +9,6 @@ export async function loader({ params }) {
 
 const Shift = () => {
     const shift = useLoaderData();
-    console.log(shift);
 
     return `${formatTime(shift.start_timestamp)}${
         shift.state ? "-" + formatTime(shift.end_timestamp) : ""

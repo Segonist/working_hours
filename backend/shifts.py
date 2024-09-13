@@ -40,6 +40,9 @@ async def read_shift(shift_id: int):
         if shift_id == 0:
             statement = select(func.max(Shift.id))
             shift_id = session.exec(statement).one()
+            # SQL MAX() returns max value or NULL, so .one() is not throwing an exception
+            if shift_id is None:
+                return {}
 
         shift = session.get(Shift, shift_id)
 
