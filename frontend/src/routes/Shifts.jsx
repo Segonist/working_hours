@@ -1,5 +1,6 @@
 import { Link, useLoaderData } from "react-router-dom";
 import { getShifts } from "../shifts";
+import { getDuration, formatTime } from "../utils";
 
 export async function loader() {
     const shifts = await getShifts();
@@ -8,15 +9,6 @@ export async function loader() {
 
 const Shifts = () => {
     const shifts = useLoaderData();
-
-    function formatTime(timestamp) {
-        return new Date(timestamp).toISOString().slice(11, 19);
-    }
-
-    function getDuration(start, stop) {
-        let delta = stop - start;
-        return formatTime(delta);
-    }
 
     return (
         <>

@@ -1,5 +1,6 @@
 const host = "http://127.0.0.1:8000";
 
+// return last entry for this user if get 0
 export async function getShift(shift_id) {
     const request = new Request(`${host}/api/shift/${shift_id}`, {
         method: "GET",

@@ -33,6 +33,7 @@ async def create_shift(shift: Shift):
 
 
 @router.get("/api/shift/{shift_id}", response_model=Shift)
+# if shift_id is 0, it will return last entry for this user
 async def read_shift(shift_id: int):
     # TODO КОРИЧСТУВАЧ МАЄ МАТИ ДОСТУП ДО ВПИСУ ЩОБ ПРОЧИТАТИ
     with Session(engine) as session:

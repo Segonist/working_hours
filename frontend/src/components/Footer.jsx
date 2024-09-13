@@ -26,13 +26,13 @@ const Footer = () => {
                 <Typography>Made by Segonist</Typography>
                 <Stack direction="row" spacing={1}>
                     <a href="https://github.com/Segonist" target="_blank">
-                        <img src="github.svg" alt="github link" />
+                        <img src="/github.svg" alt="github link" />
                     </a>
                     <a
                         href="https://discordapp.com/users/491260818139119626"
                         target="_blank"
                     >
-                        <img src="discord.svg" alt="discord link" />
+                        <img src="/discord.svg" alt="discord link" />
                     </a>
                 </Stack>
             </Stack>

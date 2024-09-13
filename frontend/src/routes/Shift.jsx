@@ -1,13 +1,23 @@
-import { useEffect } from "react";
+import { useLoaderData } from "react-router-dom";
 import { getShift } from "../shifts";
+import { getDuration, formatTime } from "../utils";
+
+export async function loader({ params }) {
+    const shift = await getShift(params.shiftId);
+    return shift;
+}
 
 const Shift = () => {
-    useEffect(() => {
-        let data = getShift();
-        console.log(data);
-    }, []);
+    const shift = useLoaderData();
+    console.log(shift);
 
-    return <h1>Shift</h1>;
+    return `${formatTime(shift.start_timestamp)}${
+        shift.state ? "-" + formatTime(shift.end_timestamp) : ""
+    }, ${
+        shift.state
+            ? getDuration(shift.start_timestamp, shift.end_timestamp)
+            : "не закінчено"
+    } ${shift.wage}₴/год`;
 };
 
 export default Shift;
