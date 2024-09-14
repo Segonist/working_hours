@@ -22,12 +22,9 @@ async def get_all_shifts():
 async def create_shift(shift: Shift):
     # TODO КОРИЧСТУВАЧ МАЄ БУТИ АВТОРИЗОВАНИМ ЩОБ СТВОРИТИ
     with Session(engine) as session:
-        shift = dict(shift)
-        new_shift = Shift(**shift)
-        session.add(new_shift)
-
+        session.add(shift)
         session.commit()
-        id = new_shift.id
+        id = shift.id
 
     return {"id": id}
 

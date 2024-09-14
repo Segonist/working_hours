@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 import shifts
+import auth
 
 app = FastAPI()
 
@@ -18,3 +19,4 @@ app.add_middleware(
 )
 
 app.include_router(shifts.router)
+app.include_router(auth.router)

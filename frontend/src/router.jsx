@@ -1,8 +1,8 @@
 import Root from "./Root.jsx";
 import Error from "./routes/Error.jsx";
 import App from "./routes/App.jsx";
-import Login from "./routes/Login.jsx";
-import Register from "./routes/Register.jsx";
+import Login, { action as loginAction } from "./routes/Login.jsx";
+import Register, { action as registerAction } from "./routes/Register.jsx";
 import Profile from "./routes/Profile.jsx";
 import Shift, { loader as shiftLoader } from "./routes/Shift.jsx";
 import Shifts, { loader as shiftsLoader } from "./routes/Shifts.jsx";
@@ -18,10 +18,12 @@ const routes = createBrowserRouter([
             {
                 path: "/login",
                 element: <Login />,
+                action: loginAction,
             },
             {
                 path: "/register",
                 element: <Register />,
+                action: registerAction,
             },
             {
                 path: "/profile",
