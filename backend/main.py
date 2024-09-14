@@ -1,13 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 import shifts
 import auth
 
+load_dotenv()
+
 app = FastAPI()
 
 origins = [
-    "http://localhost:5173"
+    "*"
 ]
 
 app.add_middleware(

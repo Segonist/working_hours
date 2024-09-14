@@ -1,8 +1,13 @@
 from sqlmodel import create_engine
+from dotenv import load_dotenv
+import os
 
 import models
 
-engine = create_engine("sqlite:///working_hours.db", echo=True)
+DATABASE_ADRESS = os.getenv("DATABASE_ADRESS")
+
+
+engine = create_engine(DATABASE_ADRESS, echo=True)
 
 
 def create_db_and_tables():

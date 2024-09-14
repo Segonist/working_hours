@@ -1,5 +1,5 @@
 import { Link, useLoaderData } from "react-router-dom";
-import { getShifts } from "../shifts";
+import { getShifts } from "../requests/shifts";
 import { getDuration, formatTime } from "../utils";
 
 export async function loader() {

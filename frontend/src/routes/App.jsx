@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Stopwatch from "../components/Stopwatch.jsx";
-import { createShift, getShift, updateShift } from "../shifts.js";
+import { createShift, getShift, updateShift } from "../requests/shifts";
 
 const App = () => {
     const [startTime, setStartTime] = useState(0);

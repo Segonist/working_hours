@@ -5,6 +5,7 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 import jwt
 from jwt.exceptions import InvalidTokenError
+import os
 
 from datetime import datetime, timedelta, timezone
 from typing_extensions import Annotated
@@ -12,9 +13,9 @@ from typing_extensions import Annotated
 from models import User
 from database import engine
 
-SECRET_KEY = "553e1966e2780b7560e1bacf10b06d08a55d36ce5d637ef03a0b8be0e3b5f13c"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 
 class Token(BaseModel):
@@ -46,6 +47,23 @@ def get_user(username: str):
         statement = select(User).where(User.username == username)
         user = session.exec(statement).first()
         return user
+
+
+def create_user(username: str, password: str):
+    with Session(engine) as session:
+        hashed_password = get_password_hash(password)
+        new_user = User(username=username, password=hashed_password)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+    return new_user
+
+
+def user_excist(username):
+    user = get_user(username)
+    if user:
+        return True
+    return False
 
 
 def authenticate_user(username: str, password: str):
@@ -80,6 +98,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except InvalidTokenError:
         raise credentials_exception
+
     user = get_user(token_data.username)
     if user is None:
         return credentials_exception
@@ -97,7 +116,8 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         {"sub": user.username}, access_token_expires)
 
@@ -105,23 +125,16 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 
 
 @router.post("/api/user")
-async def create_user(username: Annotated[str, Form()], password: Annotated[str, Form()]):
-    with Session(engine) as session:
-        statement = select(User).where(User.username == username)
-        user_excist = session.exec(statement).first()
-        if user_excist:
-            raise HTTPException(
-                status_code=409,
-                detail="User already excist",
-            )
+async def register_user(username: Annotated[str, Form()], password: Annotated[str, Form()]):
+    if user_excist(username):
+        raise HTTPException(
+            status_code=409,
+            detail="User already excist",
+        )
+    new_user = create_user(username, password)
 
-        hashed_password = get_password_hash(password)
-        new_user = User(username=username, password=hashed_password)
-        session.add(new_user)
-        session.commit()
-        session.refresh(new_user)
-
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(
+        minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         {"sub": new_user.username}, access_token_expires)
 
