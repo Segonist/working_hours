@@ -36,8 +36,7 @@ async def read_shift(shift_id: int):
     with Session(engine) as session:
         if shift_id == 0:
             statement = select(func.max(Shift.id))
-            shift_id = session.exec(statement).one()
-            # SQL MAX() returns max value or NULL, so .one() is not throwing an exception
+            shift_id = session.exec(statement).first()
             if shift_id is None:
                 return {}
 
@@ -71,4 +70,4 @@ async def delete_shift(shift_id: int):
         session.delete(shift)
         session.commit()
 
-    return {HTMLResponse(status_code=200)}
+    return HTMLResponse(status_code=200)

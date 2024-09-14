@@ -1,6 +1,16 @@
-import { Link, useLoaderData } from "react-router-dom";
-import { getShifts } from "../shifts";
-import { getDuration, formatTime } from "../utils";
+import { useEffect } from "react";
+import { useLoaderData, useOutletContext } from "react-router-dom";
+import {
+    TableContainer,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    Paper,
+} from "@mui/material";
+import { getShifts } from "../requests/shifts";
+import { getDuration, formatMMDD, formatHHMMSS, formatHHMM } from "../utils";
 
 export async function loader() {
     const shifts = await getShifts();
@@ -8,30 +18,68 @@ export async function loader() {
 }
 
 const Shifts = () => {
+    const setPageName = useOutletContext();
+    useEffect(() => {
+        setPageName("Зміни");
+    }, [setPageName]);
+
     const shifts = useLoaderData();
 
     return (
         <>
-            <ol>
-                {shifts.map((shift) => (
-                    <li key={shift.id}>
-                        <Link to={`shift/${shift.id}`}>
-                            {formatTime(shift.start_timestamp)}
-                            {shift.state
-                                ? "-" + formatTime(shift.end_timestamp)
-                                : ""}
-                            ,{" "}
-                            {shift.state
-                                ? getDuration(
-                                      shift.start_timestamp,
-                                      shift.end_timestamp
-                                  )
-                                : "не закінчено"}{" "}
-                            {shift.wage}₴/год
-                        </Link>
-                    </li>
-                ))}
-            </ol>
+            <TableContainer component={Paper} sx={{ mt: 10 }}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Дата</TableCell>
+                            <TableCell>Початок</TableCell>
+                            <TableCell>Кінець</TableCell>
+                            <TableCell>Тривалість</TableCell>
+                            <TableCell>Ставка</TableCell>
+                            <TableCell>Сума</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {shifts.map((shift) =>
+                            shift.state ? (
+                                <TableRow key={shift.id}>
+                                    <TableCell>
+                                        {formatMMDD(shift.start_timestamp)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatHHMM(shift.start_timestamp)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatHHMM(shift.end_timestamp)}
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatHHMMSS(
+                                            getDuration(
+                                                shift.start_timestamp,
+                                                shift.end_timestamp
+                                            )
+                                        )}
+                                    </TableCell>
+                                    <TableCell>{shift.wage}zł</TableCell>
+                                    <TableCell>
+                                        {parseInt(
+                                            (getDuration(
+                                                shift.start_timestamp,
+                                                shift.end_timestamp
+                                            ) /
+                                                3600) *
+                                                shift.wage
+                                        )}
+                                        zł
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                ""
+                            )
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
         </>
     );
 };

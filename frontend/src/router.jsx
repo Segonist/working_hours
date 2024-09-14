@@ -4,17 +4,18 @@ import App from "./routes/App.jsx";
 import Login, { action as loginAction } from "./routes/Login.jsx";
 import Register, { action as registerAction } from "./routes/Register.jsx";
 import Profile from "./routes/Profile.jsx";
-import Shift, { loader as shiftLoader } from "./routes/Shift.jsx";
 import Shifts, { loader as shiftsLoader } from "./routes/Shifts.jsx";
-
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 
 const routes = createBrowserRouter([
     {
-        path: "/",
         element: <Root />,
         errorElement: <Error />,
         children: [
+            {
+                path: "/",
+                element: <Navigate to="/stopwatch" />,
+            },
             {
                 path: "/login",
                 element: <Login />,
@@ -32,11 +33,6 @@ const routes = createBrowserRouter([
             {
                 path: "/stopwatch",
                 element: <App />,
-            },
-            {
-                path: "/shift/:shiftId",
-                element: <Shift />,
-                loader: shiftLoader,
             },
             {
                 path: "/shifts",

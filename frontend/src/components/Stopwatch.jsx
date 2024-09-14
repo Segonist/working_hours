@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { formatHHMMSS } from "../utils";
 
 const Stopwatch = ({ startTime, isRunning }) => {
     const [elapsedTime, setElapsedTime] = useState(0);
@@ -6,9 +7,10 @@ const Stopwatch = ({ startTime, isRunning }) => {
 
     useEffect(() => {
         if (startTime && isRunning) {
-            const startTimestamp = new Date(startTime).getTime();
-            const currentTimestamp = new Date().getTime();
-            const initialElapsed = currentTimestamp - startTimestamp;
+            let currentTimestamp = new Date().getTime();
+            currentTimestamp = parseInt(currentTimestamp / 1000);
+
+            const initialElapsed = currentTimestamp - startTime;
             setElapsedTime(initialElapsed);
 
             if (intervalId.current) {
@@ -16,8 +18,14 @@ const Stopwatch = ({ startTime, isRunning }) => {
             }
 
             intervalId.current = setInterval(() => {
-                setElapsedTime((prevTime) => prevTime + 1000);
-            }, 1000);
+                setElapsedTime(() => {
+                    let now = new Date().getTime();
+                    now = parseInt(now / 1000);
+                    let time = now - startTime;
+
+                    return time;
+                });
+            }, 500);
         }
 
         if (!isRunning && intervalId.current) {
@@ -32,7 +40,7 @@ const Stopwatch = ({ startTime, isRunning }) => {
         };
     }, [startTime, isRunning]);
 
-    return <h1>{new Date(elapsedTime).toISOString().slice(11, 19)}</h1>;
+    return formatHHMMSS(elapsedTime);
 };
 
 export default Stopwatch;

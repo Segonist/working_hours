@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
+import { Paper, Stack, Box, Typography } from "@mui/material";
 import Stopwatch from "../components/Stopwatch.jsx";
-import { createShift, getShift, updateShift } from "../shifts.js";
+import StopwatchButton from "../components/StopwatchButton.jsx";
+import { createShift, getShift, updateShift } from "../requests/shifts";
 
 const App = () => {
+    const setPageName = useOutletContext();
+    useEffect(() => {
+        setPageName("Секундомір");
+    }, [setPageName]);
+
     const [startTime, setStartTime] = useState(0);
     const [isRunning, setIsRunning] = useState(false);
 
     useEffect(() => {
         tryResume();
-    }, []);
+    });
 
     async function tryResume() {
         let data = await getShift(0);
@@ -22,14 +30,15 @@ const App = () => {
 
     async function handleStart() {
         let start = new Date().getTime();
+        start = parseInt(start / 1000);
 
         let body = {
             id: null,
-            user_id: 0,
+            user_id: 1,
             start_timestamp: start,
             end_timestamp: null,
             state: 0,
-            wage: 10.0,
+            wage: 8,
         };
 
         let data = await createShift(body);
@@ -45,6 +54,7 @@ const App = () => {
         let shift_id = localStorage.getItem("shift_id");
 
         let stop = new Date().getTime();
+        stop = parseInt(stop / 1000);
         let body = {
             end_timestamp: stop,
             state: 1,
@@ -56,14 +66,36 @@ const App = () => {
     }
 
     return (
-        <>
-            <Stopwatch startTime={startTime} isRunning={isRunning} />
-            {!isRunning ? (
-                <button onClick={handleStart}>Почати зміну</button>
-            ) : (
-                <button onClick={handleStop}>Закінчити зміну</button>
-            )}
-        </>
+        <Box
+            sx={{
+                width: "100%",
+                height: "100vh",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            }}
+        >
+            <Paper
+                sx={{
+                    px: 4,
+                    py: 1,
+                }}
+            >
+                <Stack direction="row" gap={4}>
+                    <Typography fontSize={50}>
+                        <Stopwatch
+                            startTime={startTime}
+                            isRunning={isRunning}
+                        />
+                    </Typography>
+                    <StopwatchButton
+                        isRunning={isRunning}
+                        handleStart={handleStart}
+                        handleStop={handleStop}
+                    />
+                </Stack>
+            </Paper>
+        </Box>
     );
 };
 

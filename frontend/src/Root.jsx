@@ -1,16 +1,20 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { Container } from "@mui/material";
 import Header from "./components/Header.jsx";
-import Footer from "./components/Footer.jsx";
 
 const Root = () => {
+    const [pageName, setPageName] = useState("");
+    function changePageName(name) {
+        setPageName(name);
+    }
+
     return (
         <>
-            <Header />
+            <Header pageName={pageName} />
             <Container maxWidth="md">
-                <Outlet />
+                <Outlet context={changePageName} />
             </Container>
-            <Footer />
         </>
     );
 };

@@ -1,8 +1,8 @@
-const host = "http://127.0.0.1:8000";
+const SERVER = import.meta.env.VITE_SERVER;
 
 // return last entry for this user if get 0
 export async function getShift(shift_id) {
-    const request = new Request(`${host}/api/shift/${shift_id}`, {
+    const request = new Request(`${SERVER}/api/shift/${shift_id}`, {
         method: "GET",
     });
 
@@ -22,7 +22,7 @@ export async function getShift(shift_id) {
 
 export async function getShifts() {
     // TODO ТЕЖ ПЕРЕРОБИТИ
-    const request = new Request(`${host}/api/shifts`, {
+    const request = new Request(`${SERVER}/api/shifts`, {
         method: "GET",
     });
 
@@ -41,7 +41,7 @@ export async function getShifts() {
 }
 
 export async function createShift(body) {
-    const request = new Request(`${host}/api/shift`, {
+    const request = new Request(`${SERVER}/api/shift`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -65,7 +65,7 @@ export async function createShift(body) {
 }
 
 export async function updateShift(shift_id, body) {
-    const request = new Request(`${host}/api/shift/${shift_id}`, {
+    const request = new Request(`${SERVER}/api/shift/${shift_id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
