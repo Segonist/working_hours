@@ -13,6 +13,10 @@ from typing_extensions import Annotated
 from models import User
 from database import engine
 
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
+
 
 class Token(BaseModel):
     access_token: str
@@ -43,6 +47,23 @@ def get_user(username: str):
         statement = select(User).where(User.username == username)
         user = session.exec(statement).first()
         return user
+
+
+def create_user(username: str, password: str):
+    with Session(engine) as session:
+        hashed_password = get_password_hash(password)
+        new_user = User(username=username, password=hashed_password)
+        session.add(new_user)
+        session.commit()
+        session.refresh(new_user)
+    return new_user
+
+
+def user_excist(username):
+    user = get_user(username)
+    if user:
+        return True
+    return False
 
 
 def create_user(username: str, password: str):
@@ -116,7 +137,6 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
-    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
     access_token_expires = timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
@@ -134,7 +154,6 @@ async def register_user(username: Annotated[str, Form()], password: Annotated[st
         )
     new_user = create_user(username, password)
 
-    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
     access_token_expires = timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
