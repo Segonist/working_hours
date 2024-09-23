@@ -13,10 +13,6 @@ from typing_extensions import Annotated
 from models import User
 from database import engine
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
-
 
 class Token(BaseModel):
     access_token: str
@@ -24,12 +20,13 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
+    id: int
     username: str | None = None
 
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -112,19 +109,18 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
     try:
         SECRET_KEY = os.getenv("SECRET_KEY")
         ALGORITHM = os.getenv("ALGORITHM")
-        payload = jwt.decode(token, SECRET_KEY, ALGORITHM)
-        username = payload.get("sub")
-        if username is not None:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("sub")
+        username = payload.get("name")
+        if not user_id:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(username=username, id=user_id)
     except InvalidTokenError:
         raise credentials_exception
 
-    user = get_user(token_data.username)
-    if user is None:
-        return credentials_exception
+    return token_data
 
-    return user
+user_dependency = Annotated[User, Depends(get_current_user)]
 
 
 @router.post("/api/token")
@@ -137,10 +133,11 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             headers={"WWW-Authenticate": "Bearer"}
         )
 
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
     access_token_expires = timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        {"sub": user.username}, access_token_expires)
+        {"sub": user.id, "name": user.username}, access_token_expires)
 
     return Token(access_token=access_token, token_type="bearer")
 
@@ -154,14 +151,10 @@ async def register_user(username: Annotated[str, Form()], password: Annotated[st
         )
     new_user = create_user(username, password)
 
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
     access_token_expires = timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        {"sub": new_user.username}, access_token_expires)
+        {"sub": new_user.id, "name": new_user.username}, access_token_expires)
 
     return Token(access_token=access_token, token_type="bearer")
-
-
-@router.get("/users/me")
-async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user

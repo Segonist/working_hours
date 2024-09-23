@@ -33,10 +33,7 @@ const App = () => {
         start = parseInt(start / 1000);
 
         let body = {
-            id: null,
-            user_id: 1,
             start_timestamp: start,
-            end_timestamp: null,
             state: 0,
             wage: 8,
         };

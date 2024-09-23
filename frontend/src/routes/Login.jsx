@@ -25,10 +25,8 @@ export async function action({ request }) {
     const credentials = Object.fromEntries(formData);
 
     const [code, data] = await authorize(credentials);
-    console.log("action ", data);
-
     if (code == 401) {
-        return "Неправильне ім'я користувача бао пароль";
+        return "Неправильне ім'я користувача або пароль";
     }
 
     localStorage.setItem("token", data.access_token);

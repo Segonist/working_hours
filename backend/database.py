@@ -1,13 +1,11 @@
 from sqlmodel import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 import os
+from dotenv import load_dotenv
 
 import models
 
-if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
+load_dotenv()
 
 DB_USER = os.environ.get('DB_USER')
 DB_PASSWORD = os.environ.get('DB_PASSWORD')
@@ -21,16 +19,6 @@ DATABASE = 'mysql://%s:%s@%s/' % (
 )
 
 engine = create_engine(f"{DATABASE}{DB_NAME}", echo=True)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db():
-    try:
-        db = SessionLocal()
-        yield db
-    finally:
-        db.close()
 
 
 def create_database_if_not_exists():
